@@ -1,70 +1,120 @@
-# SignSense AI - Indian Sign Language Recognition System
+# SignSense AI — Real-Time Indian Sign Language Recognition System
+
+<div align="center">
+
+![SignSense AI Banner](https://img.shields.io/badge/SignSense-AI-00e5ff?style=for-the-badge&logo=openai&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.15-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.14-0077ED?style=for-the-badge&logo=google&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.8-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-2.3-000000?style=for-the-badge&logo=flask&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
+
+**A Deep Learning powered real-time Indian Sign Language (ISL) recognition platform.**  
+*Department of Computer Science & Engineering — SRM University*
+
+</div>
+
+---
 
 ## 📋 Overview
 
-SignSense AI is a real-time Indian Sign Language (ISL) recognition system powered by Deep Learning. The system uses an LSTM-based neural network to recognize 49 different ISL gestures from live webcam feed, making sign language accessible to everyone.
+**SignSense AI** is a real-time Indian Sign Language (ISL) recognition system powered by deep learning and computer vision. The system captures live video from any standard webcam, extracts 258 skeletal & hand landmarks using Google MediaPipe, and classifies gestures into 49 distinct ISL vocabulary classes using a stacked 2-layer LSTM recurrent neural network.
 
-## 🎯 Project Highlights
+The platform includes an intuitive, high-performance web application featuring real-time detection overlays, sliding-window voting stabilization, session analytics, and dynamic sentence aggregation.
 
-- **49 ISL Gesture Classes** - Comprehensive vocabulary covering greetings, actions, questions, and more
-- **Real-time Recognition** - 30fps processing with minimal latency (~33ms on GPU)
-- **High Accuracy** - 98.48% test accuracy with 0.98 Macro F1 Score
-- **Multi-Platform** - Runs on CPU/GPU with automatic device detection
-- **Responsive UI** - Mobile-friendly interface with dark theme
+---
 
-## 🏗️ Architecture
+## 🎯 Key Highlights
 
-### Model Architecture
-- **Input**: 258 keypoints per frame (33 pose × 4 + 21 hand × 3 × 2)
-- **Sequence Length**: 30 frames
-- **LSTM Layers**: 2 layers with 128 hidden units
-- **Dropout**: 0.5 for regularization
-- **Output**: 49 gesture classes with softmax activation
+- **49 Dynamic ISL Classes**: Comprehensive vocabulary covering daily greetings, verbs, requests, questions, and common expressions.
+- **High Test Accuracy**: **98.48%** overall accuracy with a **0.98 Macro F1 score**.
+- **Real-Time 30 FPS Processing**: Low latency inference (~33ms GPU / ~80ms CPU).
+- **258 Keypoint Input**: Holistically extracts 33 pose landmarks (with visibility) and 21 landmarks for each hand (x, y, z).
+- **Temporal Voting Stabilization**: 20-frame majority voting buffer prevents false positives and jitter.
+- **Cyber Midnight UI**: Modern dark theme with real-time HUD overlays, landmark visualizer, and Chart.js analytics.
 
-### Technology Stack
+---
+
+## 🏗️ Architecture & Pipeline
+
+```
+  ┌──────────────┐      ┌─────────────────────────┐      ┌─────────────────────────┐
+  │ Webcam Input │ ───> │  MediaPipe Holistic     │ ───> │ Normalization & EMA     │
+  │   (30 FPS)   │      │  (258 3D Keypoints)     │      │ Temporal Smoothing (α)  │
+  └──────────────┘      └─────────────────────────┘      └─────────────────────────┘
+                                                                      │
+                                                                      ▼
+  ┌──────────────┐      ┌─────────────────────────┐      ┌─────────────────────────┐
+  │ Live Web UI  │ <─── │ Voting Buffer (12/20)   │ <─── │ 2-Layer LSTM Network    │
+  │ Sentence HUD │      │ Prediction Stabilization│      │ (128 Hidden, 49 Classes)│
+  └──────────────┘      └─────────────────────────┘      └─────────────────────────┘
+```
+
+### LSTM Model Specifications
+- **Input Dimensions**: 258 keypoints per frame (33 pose × 4 + 21 left hand × 3 + 21 right hand × 3)
+- **Sequence Length**: 30 consecutive frames
+- **Hidden Units**: 128 (2 stacked bidirectional/standard LSTM layers)
+- **Regularization**: Dropout (p=0.5)
+- **Output Classes**: 49 gesture classes + Softmax distribution
+
+---
+
+## 🛠️ Technology Stack
 
 | Component | Technologies |
-|-----------|-------------|
-| **Frontend** | HTML5, Tailwind CSS, Chart.js |
-| **Backend** | Flask (Python) |
-| **ML Framework** | PyTorch |
-| **Computer Vision** | MediaPipe, OpenCV |
-| **Data Processing** | NumPy |
+|---|---|
+| **Deep Learning Framework** | PyTorch (`torch>=2.2.0`) |
+| **Computer Vision & Tracking** | MediaPipe Holistic (`0.10.14`), OpenCV (`4.8+`) |
+| **Data Processing & Smoothing** | NumPy (`1.26.4`), SciPy, Joblib |
+| **Backend & Web Server** | Flask (`2.3.3`), Werkzeug, Gunicorn |
+| **Frontend Interface** | HTML5, Tailwind CSS, Chart.js, JetBrains Mono, Anta |
+
+---
 
 ## 📁 Project Structure
 
-<pre>
-signsense-ai/
+```
+SignSense-AI/
 ├── templates/
-│   ├── index.html 
-│   ├── inference.html
-│   ├── analytics.html 
-│   └── data_analytics.html
-├── app.py
-├── sign_lstm_best.pt
-└── requirements.txt
-</pre>
-
-
-## 🚀 Installation & Setup
-
-### Prerequisites
-- Python 3.8 or higher
-- Webcam for live recognition
-- CUDA-capable GPU (optional, for faster inference)
-
-### Step 1: Clone/Download the Project
-```bash
-git clone https://github.com/amudhan-mohan/rtslr.git
-cd rtslr
+│   ├── index.html                  # Landing page & project showcase
+│   ├── change-mode.html            # Recognition mode selector
+│   ├── inference.html              # Dynamic 49-gesture real-time inference
+│   ├── analytics.html              # Dynamic session metrics & chart logs
+│   ├── data_analytics.html         # Training dataset distribution & F1 scores
+│   ├── static_inference.html       # Alphabet/finger-spelling interface
+│   ├── static_analytics.html       # Static session analytics
+│   └── static_data_analytics.html  # Static dataset analytics
+├── app.py                          # Unified Flask backend & CV inference engine
+├── sign_lstm_best.pt               # Trained PyTorch LSTM weights (49 ISL classes)
+├── requirements.txt                # Python package dependencies
+├── render.yaml                     # Cloud deployment configuration
+└── README.md                       # Documentation
 ```
 
-### Step 2: Create Virtual Environment (Recommended)
+---
+
+## 🚀 Getting Started & Installation
+
+### Prerequisites
+- Python 3.11 or Python 3.12 installed
+- Standard built-in or external webcam
+
+### Step 1: Clone the Repository
 ```bash
-python -m venv venv
-# Activate on Windows:
-venv\Scripts\activate
-# Activate on Mac/Linux:
+git clone https://github.com/ArshSyed17/SignSense-AI.git
+cd SignSense-AI
+```
+
+### Step 2: Create and Activate Virtual Environment
+**On Windows:**
+```powershell
+py -3.12 -m venv venv
+.\venv\Scripts\activate
+```
+
+**On macOS / Linux:**
+```bash
+python3 -m venv venv
 source venv/bin/activate
 ```
 
@@ -78,207 +128,52 @@ pip install -r requirements.txt
 python app.py
 ```
 
-### Step 5: Access the Application
-
+### Step 5: Open in Browser
 Open your browser and navigate to:
-```bash
+```
 http://localhost:5000
 ```
 
-## 📊 Dataset Information
+---
 
-### Dataset Composition
+## 📊 Dataset & Class Distribution
 
-| Split | Samples | Percentage |
-|-------|---------|------------|
-| **Training** | 2,623 | 80% |
-| **Testing** | 656 | 20% |
-| **Total** | **3,279** | **100%** |
+The LSTM model was trained on **3,279** verified ISL gesture sequences across 49 categories:
 
-## 🎯 Gesture Categories
+| Dataset Split | Samples | Percentage |
+|---|---|---|
+| **Training Set** | 2,623 sequences | 80% |
+| **Validation / Test Set** | 656 sequences | 20% |
+| **Total** | **3,279 sequences** | **100%** |
 
-| Category | Count | Examples |
-|----------|-------|----------|
-| 👋 Greetings & Basics | 12 | hello, bye, thank_you, welcome, sorry, good |
-| 👤 People & Identity | 10 | i/me, you, my, your, name, who, teacher |
-| ⚡ Actions & Verbs | 11 | do, write, read, study, look, come, help |
-| 📍 Place, Time & Questions | 16 | home, work, class, here, now, what, how |
-
-## 🎮 Usage Guide
-
-### Live Recognition (Inference Page)
-
-1. Click on "Inference" in the navigation bar
-2. Allow camera access when prompted
-3. Click "Turn On" to start the camera
-4. Perform ISL gestures in front of the camera
-5. View real-time predictions with confidence scores
-
-### Features
-
-- **🔍 Real-time Landmark Detection:** Skeletal and hand landmarks overlaid on video
-- **📊 Confidence Scoring:** Percentage-based confidence for each prediction
-- **💬 Sentence Builder:** Auto-builds sentences from detected gestures
-- **📈 Session Analytics:** Track recognition history and statistics
-- **🗂️ Dataset Analytics:** View comprehensive dataset distribution
-
-## 📈 Performance Metrics
-
-### Model Performance
-
-| Metric | Score |
-|--------|-------|
-| Test Accuracy | **98.48%** |
-| Macro Precision | 0.99 |
-| Macro Recall | 0.98 |
-| Macro F1 Score | 0.98 |
-| Weighted F1 Score | 0.98 |
+### Gesture Categories:
+- **Greetings & Basics** (12 classes): *Hello, Bye, Thank You, Welcome, Sorry, Good, Morning, Night, etc.*
+- **Identity & People** (10 classes): *I / Me, You, My, Your, Name, Who, Teacher, Student, etc.*
+- **Actions & Verbs** (11 classes): *Do, Write, Read, Study, Look, Come, Help, Stand, Walk, etc.*
+- **Questions & Places** (16 classes): *Home, Work, Class, Here, Now, What, How, Where, When, Why, etc.*
 
 ---
 
-### Per-Category Performance
+## 👥 Project Team
 
-| Category | Accuracy |
-|----------|----------|
-| Greetings | 94% |
-| Identity | 91% |
-| Actions | 88% |
-| Questions | 86% |
-| Complex Gestures | 82% |
+| Name | Registration Number | Department & Section | Project Role |
+|---|---|---|---|
+| **Arsh Syed** | `AP23110010587` | B.Tech CSE — Section D | Deep Learning & Model Architecture |
+| **Surya Teja Annam** | `AP23110010525` | B.Tech CSE — Section D | Real-Time Pipeline & Full-Stack Integration |
 
----
-
-### Inference Speed
-
-| Device | Speed |
-|--------|-------|
-| GPU | ~33ms per frame |
-| CPU | ~80-100ms per frame |
+**Institution**: Department of Computer Science & Engineering, SRM University  
+**Academic Project**: B.Tech CSE Deep Learning Project
 
 ---
 
-## 🔧 API Endpoints
+## 📄 License & Attribution
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Home page |
-| `/instance` | GET | Live recognition interface |
-| `/analytics` | GET | Session analytics page |
-| `/video_feed` | GET | Video stream endpoint |
-| `/api/state` | GET | Current recognition state |
-| `/api/analytics` | GET | Session analytics data |
-| `/api/camera/control` | POST | Camera on/off control |
-| `/api/clear_history` | POST | Clear recognition history |
-
-## 🛠️ Technologies Used
-
-### Backend
-
-- 🐍 **Flask** - Web framework
-- 🔥 **PyTorch** - Deep learning framework
-- ✋ **MediaPipe** - Landmark detection
-- 👁️ **OpenCV** - Video processing
-- 🔢 **NumPy** - Numerical operations
-
-### Frontend
-
-- 🎨 **Tailwind CSS** - Styling
-- 📊 **Chart.js** - Data visualization
-- 🖼️ **Font Awesome** - Icons
-- ✍️ **Google Fonts** - Typography (Syne, JetBrains Mono)
-
-## 📝 Model Training Details
-
-### Hyperparameters
-
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| `input_size` | 258 | Keypoint dimensions |
-| `hidden_size` | 128 | LSTM hidden units |
-| `num_layers` | 2 | LSTM layers |
-| `dropout` | 0.5 | Dropout rate |
-| `sequence_length` | 30 | Frames per sequence |
-| `batch_size` | 32 | Training batch size |
-| `learning_rate` | 0.001 | Adam optimizer |
-| `epochs` | 100 | Total epochs |
-| `best_epoch` | 62 | Best checkpoint |
-
-## 🔄 Data Processing Pipeline
-
-| Step | Description |
-|------|-------------|
-| **Frame Capture** | Webcam feed at 30 FPS |
-| **Landmark Extraction** | MediaPipe extracts 258 keypoints |
-| **Normalization** | Spatial normalization relative to hip center |
-| **EMA Smoothing** | Exponential Moving Average (α=0.5) |
-| **Sequence Buffer** | 30-frame sliding window |
-| **LSTM Inference** | Predict gesture class |
-| **Voting Buffer** | 20-frame majority voting (12/20 threshold) |
-
----
-
-## 🎨 UI Features
-
-| Feature | Description |
-|---------|-------------|
-| 🌙 **Dark Theme** | Eye-friendly dark interface |
-| 📱 **Responsive Design** | Works on desktop, tablet, and mobile |
-| ☰ **Mobile Menu** | Hamburger menu for smaller screens |
-| ⚡ **Real-time Updates** | Live confidence scores and predictions |
-| 📊 **Interactive Charts** | Dynamic data visualization with Chart.js |
-
----
-
-## 📄 License
-
-This project is developed for academic purposes as part of the Bachelor of Engineering program.
-
----
-
-## 👥 Team
-
-| Name | Registration / Roll No | Department & Section | Role |
-|------|------------------------|----------------------|------|
-| **Arsh Syed** | AP23110010587 | B.Tech CSE - Section D | Deep Learning & Model Architecture |
-| **Surya Teja Annam** | AP23110010525 | B.Tech CSE - Section D | Real-Time Pipeline & Full-Stack Integration |
-
-**Institution**: Department of Computer Science and Engineering, SRM University  
-**Project**: B.Tech CSE Deep Learning Project
-
----
-
-## 🙏 Acknowledgments
-
-- Indian Sign Language Research and Training Centre (ISLRTC)
-- MediaPipe team for pose and hand landmark detection
-- PyTorch community for deep learning frameworks
-
----
-
-## 📞 Support
-
-For issues or queries:
-
-- Check the console logs for errors
-- Ensure webcam is properly connected
-- Verify all dependencies are installed correctly
-- Make sure the model file `sign_lstm_best.pt` is in the root directory
-
----
-
-## 🔄 Future Enhancements
-- Add more gesture classes (100+)
-- Implement continuous sentence recognition
-- Add speech-to-text output for recognized signs
-- Deploy as web application with cloud backend
-- Add user authentication and progress tracking
-- Implement transfer learning for new users
-- Add support for regional ISL variations
+This project is developed for educational and research purposes under the **B.Tech Computer Science & Engineering** curriculum at **SRM University**.
 
 ---
 
 <div align="center">
-  
-**© 2026 SignSense AI** — B.Tech CSE Deep Learning Project, SRM University. Built with ❤️ for the Indian Sign Language community.
+
+**© 2026 SignSense AI** — Built with ❤️ for the Indian Sign Language community.
 
 </div>
