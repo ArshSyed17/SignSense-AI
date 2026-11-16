@@ -28,7 +28,7 @@ The platform includes an intuitive, high-performance web application featuring r
 
 - **49 Dynamic ISL Classes**: Comprehensive vocabulary covering daily greetings, verbs, requests, questions, and common expressions.
 - **High Test Accuracy**: **98.48%** overall accuracy with a **0.98 Macro F1 score**.
-- **Real-Time 30 FPS Processing**: Low latency inference (~33ms GPU / ~80ms CPU).
+- **Real-Time 30 FPS Processing**: Low latency inference (~33ms on GPU / ~80ms on CPU).
 - **258 Keypoint Input**: Holistically extracts 33 pose landmarks (with visibility) and 21 landmarks for each hand (x, y, z).
 - **Temporal Voting Stabilization**: 20-frame majority voting buffer prevents false positives and jitter.
 - **Cyber Midnight UI**: Modern dark theme with real-time HUD overlays, landmark visualizer, and Chart.js analytics.
@@ -53,21 +53,22 @@ The platform includes an intuitive, high-performance web application featuring r
 ### LSTM Model Specifications
 - **Input Dimensions**: 258 keypoints per frame (33 pose × 4 + 21 left hand × 3 + 21 right hand × 3)
 - **Sequence Length**: 30 consecutive frames
-- **Hidden Units**: 128 (2 stacked bidirectional/standard LSTM layers)
-- **Regularization**: Dropout (p=0.5)
-- **Output Classes**: 49 gesture classes + Softmax distribution
+- **Hidden Units**: 128 (2 stacked LSTM layers)
+- **Regularization**: Dropout ($p=0.5$)
+- **Output Classes**: 49 gesture classes with Softmax probability distribution
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Technology Stack & Requirements
 
-| Component | Technologies |
+| Component | Technologies & Versions |
 |---|---|
+| **Python Runtime** | Python 3.12 (Recommended: 3.12.x or 3.11.x) |
 | **Deep Learning Framework** | PyTorch (`torch>=2.2.0`) |
-| **Computer Vision & Tracking** | MediaPipe Holistic (`0.10.14`), OpenCV (`4.8+`) |
-| **Data Processing & Smoothing** | NumPy (`1.26.4`), SciPy, Joblib |
-| **Backend & Web Server** | Flask (`2.3.3`), Werkzeug, Gunicorn |
-| **Frontend Interface** | HTML5, Tailwind CSS, Chart.js, JetBrains Mono, Anta |
+| **Computer Vision & Tracking** | MediaPipe Holistic (`mediapipe==0.10.14`), OpenCV (`opencv-python==4.8.1.78`) |
+| **Data Processing & ML** | NumPy (`numpy==1.26.4`), Joblib (`1.3.2`), ML-Dtypes (`0.3.2`) |
+| **Backend & Web Server** | Flask (`flask==2.3.3`), Gunicorn (`21.2.0`), Werkzeug |
+| **Frontend Interface** | HTML5, Tailwind CSS, Chart.js, Google Fonts (Anta, Ubuntu, JetBrains Mono) |
 
 ---
 
@@ -76,37 +77,47 @@ The platform includes an intuitive, high-performance web application featuring r
 ```
 SignSense-AI/
 ├── templates/
-│   ├── index.html                  # Landing page & project showcase
-│   ├── change-mode.html            # Recognition mode selector
-│   ├── inference.html              # Dynamic 49-gesture real-time inference
-│   ├── analytics.html              # Dynamic session metrics & chart logs
-│   ├── data_analytics.html         # Training dataset distribution & F1 scores
+│   ├── index.html                  # Main landing page & system overview
+│   ├── change-mode.html            # Mode selector (Dynamic LSTM vs Static Alphabet)
+│   ├── inference.html              # Dynamic 49-gesture real-time inference interface
+│   ├── analytics.html              # Dynamic session metrics & chart visualizer
+│   ├── data_analytics.html         # Training dataset distribution & class metrics
 │   ├── static_inference.html       # Alphabet/finger-spelling interface
 │   ├── static_analytics.html       # Static session analytics
 │   └── static_data_analytics.html  # Static dataset analytics
-├── app.py                          # Unified Flask backend & CV inference engine
-├── sign_lstm_best.pt               # Trained PyTorch LSTM weights (49 ISL classes)
-├── requirements.txt                # Python package dependencies
+├── app.py                          # Main application entry point & CV inference engine
+├── sign_lstm_best.pt               # Pre-trained PyTorch model weights (49 ISL classes)
+├── requirements.txt                # Pinned library dependencies for reproduction
 ├── render.yaml                     # Cloud deployment configuration
-└── README.md                       # Documentation
+└── README.md                       # Complete setup, testing, and execution guide
 ```
+
+> **Main file to run:** `app.py`
 
 ---
 
-## 🚀 Getting Started & Installation
+## 🚀 Installation & Setup Guide
 
-### Prerequisites
-- Python 3.11 or Python 3.12 installed
-- Standard built-in or external webcam
+### 1. Prerequisites
+- **Python**: Version **3.12** (or 3.11) installed on your system.
+- **Hardware**: Standard webcam (built-in or USB external).
+- **Git** (optional, for cloning).
 
-### Step 1: Clone the Repository
+---
+
+### 2. Environment Setup
+
+#### Step 1: Clone or Extract the Project
+Extract the zip file or clone the repository:
 ```bash
 git clone https://github.com/ArshSyed17/SignSense-AI.git
 cd SignSense-AI
 ```
 
-### Step 2: Create and Activate Virtual Environment
-**On Windows:**
+#### Step 2: Create a Virtual Environment
+Using Python 3.12:
+
+**On Windows (PowerShell / Command Prompt):**
 ```powershell
 py -3.12 -m venv venv
 .\venv\Scripts\activate
@@ -114,43 +125,95 @@ py -3.12 -m venv venv
 
 **On macOS / Linux:**
 ```bash
-python3 -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate
 ```
 
-### Step 3: Install Dependencies
+#### Step 3: Install Required Libraries
+Install all exact dependencies using `requirements.txt`:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 4: Run the Application
+---
+
+## 📦 Dataset & Model Placement Instructions
+
+### Model Weights Placement
+The system comes with the pre-trained deep learning model already included:
+- **Model File**: `sign_lstm_best.pt`
+- **Location**: Must be placed in the **root directory** of the project:
+  ```
+  SignSense-AI/
+  ├── sign_lstm_best.pt   <-- Pre-trained weights file
+  ├── app.py
+  └── ...
+  ```
+- **Size**: ~1.29 MB (1,352,501 bytes).
+- When `app.py` runs, it automatically scans for `sign_lstm_best.pt` in the working directory and loads it onto CPU/GPU.
+
+### Dataset Information
+The model was trained on the standardized Indian Sign Language (ISL) landmark dataset:
+- **Total Samples**: 3,279 video sequences
+- **Training Split**: 2,623 sequences (80%)
+- **Testing Split**: 656 sequences (20%)
+- **Classes**: 49 gesture categories (greetings, identity, action verbs, and questions).
+- The dataset feature statistics, class distributions, and F1 performance per class are built directly into the web application under the **Dataset Analytics** page (`/dynamic/dataset-analytics`).
+
+---
+
+## 💻 Commands to Run, Test, and Evaluate
+
+### 1. Run the Main Application
+To start the live recognition web server:
 ```bash
 python app.py
 ```
+*(Or directly using the virtual environment: `.\venv\Scripts\python.exe app.py`)*
 
-### Step 5: Open in Browser
-Open your browser and navigate to:
+### 2. Access the Application
+Open any modern web browser and navigate to:
 ```
 http://localhost:5000
+```
+- Click **"Inference"** in the navigation bar or choose **Dynamic Mode**.
+- Click **"Turn On"** to activate your webcam.
+- Perform any of the 49 ISL signs in front of the camera to see real-time landmark tracking, predicted labels, confidence percentages, and sentence building.
+
+### 3. Verify / Test Model & Dependencies
+To test if all libraries and the model load properly without starting the web server, run this verification command:
+```bash
+python -c "import torch, mediapipe, cv2, numpy, flask; print('Libraries: OK'); model = torch.load('sign_lstm_best.pt', map_location='cpu', weights_only=False); print('Model load: SUCCESS')"
+```
+
+### 4. Health Check Endpoint
+While the server is running, you can test the backend health and model status via curl or browser:
+```bash
+curl http://localhost:5000/api/health
+```
+**Expected Response:**
+```json
+{
+  "status": "healthy",
+  "dynamic_model_loaded": true,
+  "mediapipe_available": true,
+  "dynamic_camera_active": false
+}
 ```
 
 ---
 
-## 📊 Dataset & Class Distribution
+## 📊 Performance Metrics
 
-The LSTM model was trained on **3,279** verified ISL gesture sequences across 49 categories:
-
-| Dataset Split | Samples | Percentage |
-|---|---|---|
-| **Training Set** | 2,623 sequences | 80% |
-| **Validation / Test Set** | 656 sequences | 20% |
-| **Total** | **3,279 sequences** | **100%** |
-
-### Gesture Categories:
-- **Greetings & Basics** (12 classes): *Hello, Bye, Thank You, Welcome, Sorry, Good, Morning, Night, etc.*
-- **Identity & People** (10 classes): *I / Me, You, My, Your, Name, Who, Teacher, Student, etc.*
-- **Actions & Verbs** (11 classes): *Do, Write, Read, Study, Look, Come, Help, Stand, Walk, etc.*
-- **Questions & Places** (16 classes): *Home, Work, Class, Here, Now, What, How, Where, When, Why, etc.*
+| Evaluation Metric | Score |
+|---|---|
+| **Overall Test Accuracy** | **98.48%** |
+| **Macro Precision** | **0.99** |
+| **Macro Recall** | **0.98** |
+| **Macro F1 Score** | **0.98** |
+| **Weighted F1 Score** | **0.98** |
+| **GPU Inference Speed** | ~33 ms per frame (~30 FPS) |
+| **CPU Inference Speed** | ~80–100 ms per frame |
 
 ---
 
@@ -161,14 +224,14 @@ The LSTM model was trained on **3,279** verified ISL gesture sequences across 49
 | **Arsh Syed** | `AP23110010587` | B.Tech CSE — Section D | Deep Learning & Model Architecture |
 | **Surya Teja Annam** | `AP23110010525` | B.Tech CSE — Section D | Real-Time Pipeline & Full-Stack Integration |
 
-**Institution**: Department of Computer Science & Engineering, SRM University  
-**Academic Project**: B.Tech CSE Deep Learning Project
+- **Institution**: Department of Computer Science & Engineering, SRM University  
+- **Course**: B.Tech CSE Deep Learning Project
 
 ---
 
 ## 📄 License & Attribution
 
-This project is developed for educational and research purposes under the **B.Tech Computer Science & Engineering** curriculum at **SRM University**.
+Developed for academic demonstration and research purposes under the **B.Tech Computer Science and Engineering** curriculum at **SRM University**.
 
 ---
 
