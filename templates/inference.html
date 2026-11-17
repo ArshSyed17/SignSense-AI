@@ -446,7 +446,7 @@
     // Camera toggle function (UI only - backend handles actual feed)
     function setCameraState(active) {
       if (active) {
-        videoImg.src = '/video_feed';
+        videoImg.src = '/dynamic/video_feed';
         toggleIcon.textContent = '📷';
         toggleText.textContent = 'Turn Off';
         // Add a small visual feedback that camera is now ON

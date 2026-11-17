@@ -293,7 +293,12 @@ def generate_dynamic_frames():
                         if static_cap is not None:
                             static_cap.release()
                             static_cap = None
-                        dynamic_cap = cv2.VideoCapture(0)
+                        if sys.platform == 'win32':
+                            dynamic_cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+                            if not dynamic_cap.isOpened():
+                                dynamic_cap = cv2.VideoCapture(0)
+                        else:
+                            dynamic_cap = cv2.VideoCapture(0)
                         if not dynamic_cap.isOpened():
                             print("❌ Failed to open dynamic camera")
                             with dynamic_lock:
@@ -454,7 +459,12 @@ def generate_static_frames():
                         dynamic_cap.release()
                         dynamic_cap = None
                     if static_cap is None or not static_cap.isOpened():
-                        static_cap = cv2.VideoCapture(0)
+                        if sys.platform == 'win32':
+                            static_cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+                            if not static_cap.isOpened():
+                                static_cap = cv2.VideoCapture(0)
+                        else:
+                            static_cap = cv2.VideoCapture(0)
                         if not static_cap.isOpened():
                             print("❌ Failed to open static camera")
                             with static_lock:
@@ -610,6 +620,7 @@ def static_dataset_analytics():
     return render_template('static_data_analytics.html')
 
 @app.route('/dynamic/video_feed')
+@app.route('/video_feed')
 def dynamic_video_feed():
     return Response(generate_dynamic_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
