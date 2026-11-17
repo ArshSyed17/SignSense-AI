@@ -305,6 +305,8 @@ def generate_dynamic_frames():
                                 dynamic_state["camera_active"] = False
                                 camera_active = False
                         else:
+                            dynamic_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                            dynamic_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
                             print("✅ Dynamic camera started")
                 
                 if not camera_active and dynamic_cap is not None:

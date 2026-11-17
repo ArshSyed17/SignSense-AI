@@ -293,7 +293,7 @@
       </div>
 
       <div class="relative aspect-[4/3] bg-black">
-        <img id="videoFeed" src="/dynamic/video_feed" alt="Live Feed" class="w-full h-full object-cover block" />
+        <img id="videoFeed" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 480'%3E%3Crect width='100%25' height='100%25' fill='%23040f1a'/%3E%3Ccircle cx='320' cy='240' r='60' fill='%231e2d47'/%3E%3Cline x1='320' y1='180' x2='320' y2='240' stroke='%235a6a82' stroke-width='3'/%3E%3Cline x1='320' y1='300' x2='320' y2='310' stroke='%235a6a82' stroke-width='3'/%3E%3Ctext x='50%25' y='55%25' font-family='monospace' font-size='20' fill='%235a6a82' text-anchor='middle' dy='.3em'%3ECAMERA%3C/text%3E%3Ctext x='50%25' y='62%25' font-family='monospace' font-size='16' fill='%235a6a82' text-anchor='middle'%3EOFF%3C/text%3E%3C/svg%3E" alt="Live Feed" class="w-full h-full object-cover block" />
         <div class="corner tl"></div>
         <div class="corner tr"></div>
         <div class="corner bl"></div>
@@ -446,7 +446,6 @@
     // Camera toggle function (UI only - backend handles actual feed)
     function setCameraState(active) {
       if (active) {
-        videoImg.src = '/dynamic/video_feed';
         toggleIcon.textContent = '📷';
         toggleText.textContent = 'Turn Off';
         // Add a small visual feedback that camera is now ON
@@ -520,10 +519,8 @@
 
           if (response.ok) {
             setCameraState(true);
-            setTimeout(() => {
-              videoImg.src = '/dynamic/video_feed?_t=' + Date.now();
-              videoImg.style.opacity = '1';
-            }, 150);
+            videoImg.src = '/dynamic/video_feed?_t=' + Date.now();
+            videoImg.style.opacity = '1';
             showToast('Camera started', 'success');
           } else {
             throw new Error('Backend failed to start camera');
