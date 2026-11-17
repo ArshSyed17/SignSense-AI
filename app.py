@@ -262,7 +262,7 @@ def extract_features(results):
 # ==========================================
 def generate_dynamic_frames():
     """Video generator for dynamic mode (ISL gestures)"""
-    global dynamic_cap
+    global dynamic_cap, static_cap
     
     sequence = deque(maxlen=DYNAMIC_SEQUENCE_LENGTH)
     prediction_buffer = deque(maxlen=DYNAMIC_BUFFER_SIZE)
@@ -439,7 +439,7 @@ def generate_dynamic_frames():
 
 def generate_static_frames():
     """Video generator for static mode (Letters)"""
-    global static_cap
+    global static_cap, dynamic_cap
     
     prediction_history = deque(maxlen=STATIC_VOTING_BUFFER_SIZE)
     holistic = mp_holistic.Holistic(model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5) if MEDIAPIPE_AVAILABLE and mp_holistic else None
